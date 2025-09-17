@@ -1,6 +1,8 @@
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from discord.ext.commands import Bot as BotBase
+from discord import Embed
+from datetime import datetime, timezone
 
 PREFIX = "!"
 OWNER_IDS =[352217688271224834]
@@ -36,7 +38,13 @@ class Bot(BotBase):
         if not self.ready:
             self.ready = True
             self.guild = self.get_guild(1417666028023844936)
-            print("Ultron systems ready...")
+            print("Systems ready...")
+
+            channel = self.get_channel(1417943465475444949)
+
+            embed = Embed(title="Boot Protocol", description="Systems now at 100%", timestamp=datetime.now(timezone.utc))
+            embed.set_author(name="Ultron", icon_url=self.user.avatar)
+            await channel.send(embed=embed)
 
         else:
             print("I have reconnected")
