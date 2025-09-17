@@ -1,6 +1,8 @@
 import discord
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from discord.app_commands import CommandNotFound
 from discord.ext.commands import Bot as BotBase
+from discord.ext.commands import CommandNotFound
 from discord import Embed
 from datetime import datetime, timezone
 
@@ -34,6 +36,22 @@ class Bot(BotBase):
     async def on_disconnect(self):
         print("Ultron disconnecting")
 
+    async def on_error(self, err, *args, **kwargs):
+        if err == "on_command_error":
+            await args[0].send("Error has occurred.")
+        else:
+            channel = self.get_channel(1417943465475444949)
+            await channel.send("Error has occurred.")
+        raise
+
+    async def on_commmand_error(self, ctx, exc):
+        if isinstance(exc, CommandNotFound):
+            pass
+        elif hasattr(exc, "original"):
+            raise exc.original
+        else:
+            raise exc
+
     async def on_ready(self):
         if not self.ready:
             self.ready = True
@@ -42,7 +60,7 @@ class Bot(BotBase):
 
             channel = self.get_channel(1417943465475444949)
 
-            embed = Embed(title="Boot Protocol", description="Systems now at 100%", timestamp=datetime.now(timezone.utc))
+            embed = Embed(title="Boot Protocol", description="Systems now at 100%")
             embed.set_author(name="Ultron", icon_url=self.user.avatar)
             await channel.send(embed=embed)
 
