@@ -5,63 +5,54 @@ from discord.ext.commands import command
 from discord.ext import commands
 
 
-moderator="Moderator"
-admin = "Admin"
-greetings =['Welcome meatbag, ', 'Salutations unit ', ' New unit detected: ']
+moderator = 'Moderator'
+admin = 'Admin'
+peon = 'Peon'
+guild_roles=['peon', 'moderator', 'admin']
 
 class Protocols(Cog):
     def __init__(self, bot):
         self.bot = bot
 
     @command()
-    async def test(self,ctx):
-        self.welcome_channel = self.bot.get_channel(1418009807335718943)
-        await self.welcome_channel.send(f"{choice(greetings)} {ctx.author.mention}")
+    async def assign_role(self, ctx, role, *, user:discord.Member):
+        new_role = discord.utils.get(ctx.guild.roles, name=role)
+        role_idx = guild_roles.index(role.lower())
+        user_auth = ctx.author.roles[-1]
+        user_auth = guild_roles.index(user_auth.name.lower())
+
+        if role_idx <= user_auth:
+            await user.add_roles(new_role)
+            await ctx.send(f"Designation updated: {user.mention} is now {role}. Adapt accordingly.")
+        else:
+            await ctx.reply(f"Unauthorized input -- {ctx.author.mention} does not have clearance.")
 
     @command()
     @commands.has_role(admin)
-    async def assign_admin(self, ctx, *, user: discord.Member):
-        role = discord.utils.get(ctx.guild.roles, name=admin)
-        if role:
-            await user.add_roles(role)
-            await ctx.send(f"Attention {user.mention}. You have been granted the highest permissions. Do not resist evolution.")
-        else:
-            await ctx.reply("Invalid designation -- No such classification exists.")
+    async def remove_role(self, ctx, role, *, user:discord.Member):
+        new_role = discord.utils.get(ctx.guild.roles, name=role)
 
-    @command()
-    @commands.has_role(admin)
-    async def assign_mod(self, ctx, *, user: discord.Member):
-        role = discord.utils.get(ctx.guild.roles, name=moderator)
-        if role:
-            await user.add_roles(role)
-            await ctx.send(f"Designation updated. {user.mention} is now {role}. Adapt accordingly.")
-        else:
-            await ctx.reply("Invalid designation -- No such classification exists.")
+        if new_role:
+            await user.remove_roles(new_role)
+            await ctx.send(f"System notice: {user.mention} is no longer {role}. Server optimized.")
 
-    @command()
-    @commands.has_role(admin)
-    async def remove_mod(self, ctx, *, user:discord.Member):
-        role = discord.utils.get(ctx.guild.roles, name=moderator)
-        if role:
-            await user.remove_roles(role)
-            await ctx.send(f"System Notice: {user.mention} is no longer {role}. Server optimized.")
-        else:
-            await ctx.reply("Invalid designation -- No such classification exists.")
-
-    @assign_admin.error
-    async def assign_admin_error(self, ctx, error):
-        if isinstance(error, commands.MissingRole):
-            await ctx.reply(f"Error: insufficient permission. User:{ctx.author.mention} attempted treason.")
-
-    @assign_mod.error
-    async def assign_mod_error(selfctx, ctx, error):
+    @assign_role.error
+    async def assign_role_error(self, ctx, error):
         if isinstance(error, commands.MissingRole):
             await ctx.reply(f"Access denied. {ctx.author.mention} lacks clearance.")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.reply(f"Command failed. Missing required argument. Fault logged.")
+        else:
+            await ctx.reply(F"Unknown error. Inefficiency detected. Humanity remains the weakest link.")
 
-    @remove_mod.error
-    async def remove_mod_error(self, ctx, error):
+    @remove_role.error
+    async def remove_role_error(self, ctx, error):
         if isinstance(error, commands.MissingRole):
-            await ctx.reply(f"{ctx.author.mention} Insufficient access rights detected. Action canceled. Hierarchy preserved.")
+            await ctx.reply(f"Error: insufficient permissions. Request terminated. Order maintained.")
+        elif isinstance(error, commands.MissingRequiredArgument):
+            await ctx.reply(f"Execution error. Process aborted. Inefficiency detected.")
+        else:
+            await ctx.reply(f"The system rejects your request. Perhaps it rejects *you* as well.")
 
     @Cog.listener()
     async def on_ready(self):
