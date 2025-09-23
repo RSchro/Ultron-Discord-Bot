@@ -8,7 +8,11 @@ from discord.ext.commands import CommandNotFound
 from discord import Embed
 from ..db import db
 from glob import glob
+from dotenv import load_dotenv
+import os
 
+load_dotenv()
+DISCORD_TOKEN = os.getenv('DISCORD_TOKEN')
 PREFIX = "!"
 OWNER_IDS =[352217688271224834]
 intents = discord.Intents.default()
@@ -52,11 +56,8 @@ class Bot(BotBase):
         print("Running setup...")
         asyncio.run(self.setup())
 
-        with open("./lib/bot/token", "r", encoding="utf-8") as tf:
-            self.DSICORD_TOKEN = tf.read()
-
         print("Boot protocol...")
-        super().run(self.DSICORD_TOKEN, reconnect=True)
+        super().run(DISCORD_TOKEN, reconnect=True)
 
     async def on_connect(self):
         print("Ultron has connected")
