@@ -53,10 +53,10 @@ class Bot(BotBase):
         asyncio.run(self.setup())
 
         with open("./lib/bot/token", "r", encoding="utf-8") as tf:
-            self.TOKEN = tf.read()
+            self.DSICORD_TOKEN = tf.read()
 
         print("Boot protocol...")
-        super().run(self.TOKEN, reconnect=True)
+        super().run(self.DSICORD_TOKEN, reconnect=True)
 
     async def on_connect(self):
         print("Ultron has connected")
